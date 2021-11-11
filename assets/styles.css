@@ -1,0 +1,101 @@
+.bg_color {
+    background: '#ebecf1';
+}
+
+body {
+    background-color: #ebecf1;
+}
+
+.banner {
+    height: 75px;
+    width/max-width: 1800px;
+    margin: 0 auto;
+    background-color: #1959d1;
+    border-radius: 2px;
+    font-size: 2em;
+}
+
+.banner h2{
+    color: rgb(255, 255, 255);
+    padding-top: 10px;
+    margin-left: 2%;
+    display: inline-block;
+    font-size: 1em;
+}
+
+.modal-content {
+    position: relative;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    width: 100%;
+    pointer-events: auto;
+    background-color: #ebecf1;
+    background-clip: padding-box;
+    border: 1px solid rgba(0,0,0,.2);
+    border-radius: .3rem;
+    outline: 0;
+}
+
+.banner Img{
+    position: relative;
+    float: right;
+    right: 10px;
+    height: 75px;
+}
+
+.btn_load {
+    /*width: 17%;*/
+    padding: 0 30px;
+    width: 270px;
+}
+
+.btn_loaders {
+    color: #e2e9c0;
+    border-radius: 5px;
+    border: 1px solid #02a0da;
+    background-color: #a7001e;
+    margin: 10px;
+    height: 50px;
+    width: 250px;
+}
+
+.btn_loaders:active {
+    color: black;
+    border-radius: 5px;
+    border: 1px solid #02a0da;
+    background-color: #e2e9c0;
+    margin: 10px;
+    height: 50px;
+    width: 250px;
+}
+
+.date_picker_style {
+    border: 1px solid blue;
+    border-radius: 5px;
+    font-weight: bolder;
+}
+
+.period_lbl {
+    margin: 10px;
+    font-size: 25px;
+    font-family: cursive;
+}
+
+.div_load_btn {
+    margin: 40px 0px;
+}
+
+.btn_save_rep {
+    margin: 60px 10px 5px 40px;
+    background-color: #7aa95c;
+    width: 200px;
+    height: 40px;
+}
+
+.output_report {
+    margin: 20px 40px;
+    color: darkgreen;
+    font-weight: bold;
+}
