@@ -2,3 +2,8 @@
 /logs
 /downloads
 /.idea
+/.bash_history
+/.cache
+/.local
+/.ssh
+*.ini
