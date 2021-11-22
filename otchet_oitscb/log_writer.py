@@ -25,14 +25,16 @@ def log_writer(log_msg):
     write_date = current_date.strftime('%d-%m-%Y %H:%M:%S')
 
     filename_date = current_date.strftime('%d-%m-%Y')
-    filepath = 'logs/'
+    log_path = 'logs/'
 
-    if os.path.exists(filepath):
-        f = open(f'{filepath + filename_date}.log', 'a')
+    if os.path.exists(log_path):
+        f = open(f'{log_path + filename_date}.log', 'a')
         f.write(''.join([write_date, ': ', log_msg, '\n']))
         f.close()
+        print(log_msg)
     else:
-        os.mkdir(filepath)
-        f = open(f'{filepath + filename_date}.log', 'a')
+        os.mkdir(log_path)
+        f = open(f'{log_path + filename_date}.log', 'a')
         f.write(''.join([write_date, ': ', log_msg, '\n']))
         f.close()
+        print(log_msg)

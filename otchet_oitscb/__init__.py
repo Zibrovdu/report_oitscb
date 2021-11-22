@@ -1,6 +1,7 @@
 import base64
 import datetime
 import io
+import os
 from datetime import date, datetime
 from functools import reduce
 
@@ -81,6 +82,7 @@ def build_table(curr_data, prev_data, total_data, curr_period, prev_period):
     res_df2.loc[9] = 'из них на 3-й линии', prev_data[5], curr_data[5], np.nan
     res_df2.loc[10] = 'в работе у группы технологов', prev_data[6], curr_data[6], np.nan
     res_df2['Изменение за неделю'] = res_df2['Изменение за неделю'].round(2)
+    res_df2 = res_df2.fillna('-')
     return res_df2
 
 
@@ -130,6 +132,7 @@ def build_table_categories(df, prev_df, curr_period, prev_period):
 
     merge_df = prev_df.merge(df, on=['main_category'], how='outer')
     merge_df.rename(columns={'main_category': 'Категория обращения'}, inplace=True)
+    merge_df = merge_df.fillna('-')
 
     return merge_df
 
@@ -190,7 +193,14 @@ def write_to_word(header_list, df_list):
             cell.text = str(df_list[3].iloc[row - 1, col])
     doc.add_page_break()
 
-    doc.save('downloads/report.docx')
+    if os.path.exists(params.filepath):
+        doc.save(os.path.join(params.filepath, params.filename))
+
+    else:
+        lw.log_writer('Отсутствует каталог для файлов с отчетами. Создаем каталог...')
+        os.mkdir(params.filepath)
+        lw.log_writer('Каталог создан успешно')
+        doc.save(os.path.join(params.filepath, params.filename))
 
 
 def create_report(df, prev_df, start_date, end_date, prev_date, area):

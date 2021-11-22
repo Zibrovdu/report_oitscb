@@ -80,3 +80,7 @@ name_list_zkgu = [
 sub_bgu = 'ПУНФА, ПУиО'
 
 sub_zkgu = 'ПУОТ'
+
+filepath = 'downloads'
+
+filename = 'report.docx'

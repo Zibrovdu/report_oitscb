@@ -7,3 +7,7 @@
 /.local
 /.ssh
 *.ini
+.gitconfig
+/__pycache__
+otchet_oitscb/__pycache__
+uwsgi.log

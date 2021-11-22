@@ -1,3 +1,4 @@
+import os.path
 from datetime import datetime
 
 import dash
@@ -6,8 +7,7 @@ from dash.dependencies import Output, Input
 
 import otchet_oitscb
 import otchet_oitscb.log_writer as lw
-from otchet_oitscb.params import zik, bgu_list, cat_list_bgu, name_list_bgu, sub_bgu, cat_list_zkgu, name_list_zkgu, \
-    sub_zkgu
+import otchet_oitscb.params as params
 
 
 def get_dates(start_date, end_date):
@@ -29,6 +29,7 @@ def register_callbacks(app):
         Output('load_prev_data', 'data'),
         Output('btn_load_curr_data', 'style'),
         Output('btn_load_prev_data', 'style'),
+        Output('btn_make_report', 'hidden'),
         Input('upload_data', 'contents'),
         Input('upload_data', 'filename'),
         Input('period', 'start_date'),
@@ -39,21 +40,27 @@ def register_callbacks(app):
     def save_data(contents, filename, start_date, end_date, prev_contents, prev_filename):
         if (not start_date and not end_date) or (start_date and not end_date) or not contents:
             return dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, \
-                   dash.no_update, dash.no_update
+                   dash.no_update, dash.no_update, dash.no_update
         if contents and not prev_contents:
             start_date_d, end_date_d, prev_date_d = get_dates(start_date, end_date)
+
+            lw.log_writer(''.join(['Начальная дата отчета: ', str(start_date_d)]))
+            lw.log_writer(''.join(['Конечная дата отчета: ', str(end_date_d)]))
+            lw.log_writer(''.join(['Дата на прошлой неделе: ', str(prev_date_d)]))
 
             incoming_df = otchet_oitscb.parse_contents(contents=contents, filename=filename)
 
             period = ' '.join(['Загрузите данные за период с ', prev_date_d.strftime('%d-%m-%Y'), ' по ',
                                start_date_d.strftime('%d-%m-%Y')])
 
+            lw.log_writer(period)
+
             return '', incoming_df.to_dict('records'), period, False, dash.no_update, dash.no_update, \
-                   dict(backgroundColor='#7aa95c', color='black'), dash.no_update
+                   dict(backgroundColor='#7aa95c', color='black'), dash.no_update, dash.no_update
         if prev_contents:
             incoming_df_1 = otchet_oitscb.parse_contents(contents=prev_contents, filename=prev_filename)
-            return "", dash.no_update, dash.no_update, dash.no_update, '', incoming_df_1.to_dict('records'), \
-                   dash.no_update, dict(backgroundColor='#7aa95c', color='black')
+            return '', dash.no_update, dash.no_update, dash.no_update, '', incoming_df_1.to_dict('records'), \
+                   dash.no_update, dict(backgroundColor='#7aa95c', color='black'), False
 
     @app.callback(
         Output('test', 'children'),
@@ -76,7 +83,7 @@ def register_callbacks(app):
                     start_date=start_date_d,
                     end_date=end_date_d,
                     prev_date=prev_date_d,
-                    area=zik
+                    area=params.zik
                 )
                 df_bgu = otchet_oitscb.create_report(
                     df=df,
@@ -84,7 +91,7 @@ def register_callbacks(app):
                     start_date=start_date_d,
                     end_date=end_date_d,
                     prev_date=prev_date_d,
-                    area=bgu_list
+                    area=params.bgu_list
                 )
                 bgu_cat_df = otchet_oitscb.create_report_cat(
                     df=df,
@@ -92,9 +99,9 @@ def register_callbacks(app):
                     start_date=start_date_d,
                     end_date=end_date_d,
                     prev_date=prev_date_d,
-                    cat_list=cat_list_bgu,
-                    name_list=name_list_bgu,
-                    sub=sub_bgu
+                    cat_list=params.cat_list_bgu,
+                    name_list=params.name_list_bgu,
+                    sub=params.sub_bgu
                 )
                 zkgu_cat_df = otchet_oitscb.create_report_cat(
                     df=df,
@@ -102,9 +109,9 @@ def register_callbacks(app):
                     start_date=start_date_d,
                     end_date=end_date_d,
                     prev_date=prev_date_d,
-                    cat_list=cat_list_zkgu,
-                    name_list=name_list_zkgu,
-                    sub=sub_zkgu
+                    cat_list=params.cat_list_zkgu,
+                    name_list=params.name_list_zkgu,
+                    sub=params.sub_zkgu
                 )
 
                 df_list = [df_bgu, bgu_cat_df, df_zkgu, zkgu_cat_df]
@@ -114,6 +121,7 @@ def register_callbacks(app):
                     df_list=df_list)
                 lw.log_writer('Формирование отчета завершено')
                 return '1', dict(backgroundColor='#7aa95c', margin='5px 40px', color='black')
+            lw.log_writer('Формирование отчета завершилось с ошибкой')
             return dash.no_update, dash.no_update
 
         return '1', dict(margin='5px 40px')
@@ -125,6 +133,4 @@ def register_callbacks(app):
     )
     def func(n_clicks):
         lw.log_writer('Скачивание файла с отчетом успешно завершено')
-        return dash.dcc.send_file(
-            "./downloads/report.docx"
-        )
+        return dash.dcc.send_file(os.path.join(params.filepath, params.filename))

@@ -94,7 +94,7 @@ def serve_layout():
                     "Сформировать отчет",
                     id="btn_make_report",
                     className='btn_loaders',
-                    # hidden=True
+                    hidden=True
                 ),
             ]),
 
