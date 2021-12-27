@@ -34,7 +34,7 @@ def parse_contents(contents, filename):
         return content_df
 
 
-def count_params(df, start_date, end_date, area, total=True):
+def count_params(df, start_date, end_date, area, tech_group, total=True):
     if total:
         df = df[(df.reg_date >= datetime(date.today().year, 1, 1)) & (df.reg_date <= end_date)]
         df = df[df.assign_group == params.oitscb_group].reset_index()
@@ -60,7 +60,7 @@ def count_params(df, start_date, end_date, area, total=True):
         work_3l = df[(df.func_area.isin(area)) & (df.assign_group == params.oitscb_group)].groupby(['status', 'wait'])[
             'task_number'].count()['В ожидании', 'Работа в рамках дочернего запроса'].sum()
         work_2l = in_work - work_3l
-        work_tech = df[(df.func_area.isin(area)) & (df.assign_group == params.tech_group)]['task_number'].count()
+        work_tech = df[(df.func_area.isin(area)) & (df.assign_group.isin([params.tech_group, tech_group]))]['task_number'].count()
 
         return total_count, not_solve, inf_inq, in_work, work_2l, work_3l, work_tech
 
@@ -203,7 +203,7 @@ def write_to_word(header_list, df_list):
         doc.save(os.path.join(params.filepath, params.filename))
 
 
-def create_report(df, prev_df, start_date, end_date, prev_date, area):
+def create_report(df, prev_df, start_date, end_date, prev_date, area, tech_group):
 
     curr_period = ' '.join([start_date.strftime('%d-%m-%Y'), end_date.strftime('%d-%m-%Y')])
     prev_period = ' '.join([prev_date.strftime('%d-%m-%Y'), start_date.strftime('%d-%m-%Y')])
@@ -213,18 +213,21 @@ def create_report(df, prev_df, start_date, end_date, prev_date, area):
         start_date=start_date,
         end_date=end_date,
         area=area,
+        tech_group=tech_group,
         total=False)
     prev_data = count_params(
         df=prev_df,
         start_date=prev_date,
         end_date=start_date,
         area=area,
+        tech_group=tech_group,
         total=False)
     total_data = count_params(
         df=df,
         start_date=start_date,
         end_date=end_date,
         area=area,
+        tech_group=tech_group,
         total=True)
     data_df = build_table(
         curr_data=curr_data,

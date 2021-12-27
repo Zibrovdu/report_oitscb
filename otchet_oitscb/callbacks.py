@@ -83,7 +83,8 @@ def register_callbacks(app):
                     start_date=start_date_d,
                     end_date=end_date_d,
                     prev_date=prev_date_d,
-                    area=params.zik
+                    area=params.zik,
+                    tech_group=params.tech_group_z
                 )
                 df_bgu = otchet_oitscb.create_report(
                     df=df,
@@ -91,7 +92,8 @@ def register_callbacks(app):
                     start_date=start_date_d,
                     end_date=end_date_d,
                     prev_date=prev_date_d,
-                    area=params.bgu_list
+                    area=params.bgu_list,
+                    tech_group=params.tech_group_b
                 )
                 bgu_cat_df = otchet_oitscb.create_report_cat(
                     df=df,
