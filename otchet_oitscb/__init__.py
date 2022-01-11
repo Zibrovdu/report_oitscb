@@ -2,7 +2,7 @@ import base64
 import datetime
 import io
 import os
-from datetime import date, datetime
+from datetime import datetime
 from functools import reduce
 
 import docx
@@ -36,7 +36,7 @@ def parse_contents(contents, filename):
 
 def count_params(df, start_date, end_date, area, tech_group, total=True):
     if total:
-        df = df[(df.reg_date >= datetime(date.today().year, 1, 1)) & (df.reg_date <= end_date)]
+        df = df[(df.reg_date >= datetime(start_date.year, 1, 1)) & (df.reg_date <= end_date)]
         df = df[df.assign_group == params.oitscb_group].reset_index()
         df.drop('index', inplace=True, axis=1)
         total_count = df[df.func_area.isin(area)]['task_number'].count()
@@ -52,15 +52,27 @@ def count_params(df, start_date, end_date, area, tech_group, total=True):
         df = df[(df.reg_date >= start_date) & (df.reg_date <= end_date)]
 
         total_count = df[(df.func_area.isin(area)) & (df.assign_group == params.oitscb_group)]['task_number'].count()
+
         not_solve = df[(df.func_area.isin(area)) & (df.assign_group == params.oitscb_group)]. \
-            groupby('status')['task_number'].count()[['В ожидании', 'В работе', 'Открыт']].sum()
-        inf_inq = df[(df.func_area.isin(area)) & (df.assign_group == params.oitscb_group)].groupby(['status', 'wait'])[
-            'task_number'].count()['В ожидании', 'Запрос информации у пользователя'].sum()
+            groupby('status')['task_number'].count().reindex(['В ожидании', 'В работе', 'Открыт']).sum()
+
+        if len(df[(df.func_area.isin(area)) & (df.assign_group == params.oitscb_group)].groupby(['status', 'wait'])[
+                   'task_number'].count()) > 0:
+            inf_inq = \
+                df[(df.func_area.isin(area)) & (df.assign_group == params.oitscb_group)].groupby(['status', 'wait'])[
+                    'task_number'].count()['В ожидании', 'Запрос информации у пользователя'].sum()
+        else:
+            inf_inq = 0
         in_work = not_solve - inf_inq
-        work_3l = df[(df.func_area.isin(area)) & (df.assign_group == params.oitscb_group)].groupby(['status', 'wait'])[
-            'task_number'].count()['В ожидании', 'Работа в рамках дочернего запроса'].sum()
+        if len(df[(df.func_area.isin(area)) & (df.assign_group == params.oitscb_group)].groupby(['status', 'wait'])
+               ['task_number'].count()) > 0:
+            work_3l = df[(df.func_area.isin(area)) & (df.assign_group == params.oitscb_group)].groupby(
+                ['status', 'wait'])['task_number'].count()['В ожидании', 'Работа в рамках дочернего запроса'].sum()
+        else:
+            work_3l = 0
         work_2l = in_work - work_3l
-        work_tech = df[(df.func_area.isin(area)) & (df.assign_group.isin([params.tech_group, tech_group]))]['task_number'].count()
+        work_tech = df[(df.func_area.isin(area)) & (df.assign_group.isin([params.tech_group, tech_group]))][
+            'task_number'].count()
 
         return total_count, not_solve, inf_inq, in_work, work_2l, work_3l, work_tech
 
@@ -97,7 +109,7 @@ def count_params_categories(df, start_date, end_date, category_list, name_list, 
     df.analytics = df.analytics.apply(lambda x: x.split(';'))
 
     df['category'] = df.analytics.apply(lambda row: [item for item in row if not item.strip().isdigit()])
-    df['category'] = df['category'].apply(lambda x: [x[i].strip() for i in range(len(x))])
+    df['category'] = df['category'].apply(lambda x: [x[index].strip() for index in range(len(x))])
     df['category'] = df['category'].apply(lambda x: x[0] if len(x) > 0 else x)
     df['category'] = df['category'].apply(lambda x: '' if x == [] else x)
     df['category'] = df['category'].apply(lambda x: 'Не указано' if x == '' else x)
@@ -142,16 +154,16 @@ def write_to_word(header_list, df_list):
     doc.add_heading('Статистика по сопровождению', 0)
 
     doc.add_heading(header_list[0], 1)
-    table = doc.add_table(rows=len(df_list[0])+1, cols=4)
+    table = doc.add_table(rows=len(df_list[0]) + 1, cols=4)
     table.style = 'Table Grid'
     for column_id, column_name in enumerate(df_list[0].columns):
         cell = table.cell(0, column_id)
         cell.text = column_name
 
-    for row in range(1, len(df_list[0])+1):
+    for row in range(1, len(df_list[0]) + 1):
         for col in range(4):
             cell = table.cell(row, col)
-            cell.text = str(df_list[0].iloc[row-1, col])
+            cell.text = str(df_list[0].iloc[row - 1, col])
     doc.add_page_break()
 
     doc.add_heading(header_list[1], 1)
@@ -204,7 +216,6 @@ def write_to_word(header_list, df_list):
 
 
 def create_report(df, prev_df, start_date, end_date, prev_date, area, tech_group):
-
     curr_period = ' '.join([start_date.strftime('%d-%m-%Y'), end_date.strftime('%d-%m-%Y')])
     prev_period = ' '.join([prev_date.strftime('%d-%m-%Y'), start_date.strftime('%d-%m-%Y')])
 
@@ -240,7 +251,6 @@ def create_report(df, prev_df, start_date, end_date, prev_date, area, tech_group
 
 
 def create_report_cat(df, prev_df, start_date, end_date, prev_date, cat_list, name_list, sub):
-
     curr_period = ' '.join([start_date.strftime('%d-%m-%Y'), end_date.strftime('%d-%m-%Y')])
     prev_period = ' '.join([prev_date.strftime('%d-%m-%Y'), start_date.strftime('%d-%m-%Y')])
 
@@ -266,5 +276,5 @@ def create_report_cat(df, prev_df, start_date, end_date, prev_date, cat_list, na
         prev_df=prev_data,
         curr_period=curr_period,
         prev_period=prev_period
-        )
+    )
     return data_df

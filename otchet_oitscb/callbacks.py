@@ -86,6 +86,7 @@ def register_callbacks(app):
                     area=params.zik,
                     tech_group=params.tech_group_z
                 )
+                lw.log_writer('Завершено формирование отчета ПУОТ')
                 df_bgu = otchet_oitscb.create_report(
                     df=df,
                     prev_df=prev_df,
@@ -95,6 +96,7 @@ def register_callbacks(app):
                     area=params.bgu_list,
                     tech_group=params.tech_group_b
                 )
+                lw.log_writer('Завершено формирование отчета ПУНФА, ПУИО')
                 bgu_cat_df = otchet_oitscb.create_report_cat(
                     df=df,
                     prev_df=prev_df,
@@ -105,6 +107,7 @@ def register_callbacks(app):
                     name_list=params.name_list_bgu,
                     sub=params.sub_bgu
                 )
+                lw.log_writer('Завершено формирование отчета по категориям ПУНФА, ПУИО')
                 zkgu_cat_df = otchet_oitscb.create_report_cat(
                     df=df,
                     prev_df=prev_df,
@@ -115,13 +118,15 @@ def register_callbacks(app):
                     name_list=params.name_list_zkgu,
                     sub=params.sub_zkgu
                 )
+                lw.log_writer('Завершено формирование отчета по категориям ПУОТ')
 
                 df_list = [df_bgu, bgu_cat_df, df_zkgu, zkgu_cat_df]
 
+                lw.log_writer('Начинаем формирование итогового файла с отчетом')
                 otchet_oitscb.write_to_word(
                     header_list=otchet_oitscb.params.headers_lists,
                     df_list=df_list)
-                lw.log_writer('Формирование отчета завершено')
+                lw.log_writer('Формирование итогового файла с отчетом завершено')
                 return '1', dict(backgroundColor='#7aa95c', margin='5px 40px', color='black')
             lw.log_writer('Формирование отчета завершилось с ошибкой')
             return dash.no_update, dash.no_update
