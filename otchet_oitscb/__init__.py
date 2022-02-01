@@ -78,14 +78,15 @@ def count_params(df, start_date, end_date, area, tech_group, total=True):
 
 
 def build_table(curr_data, prev_data, total_data, curr_period, prev_period):
+
     res_df2 = pd.DataFrame(columns=['  ', f'{prev_period}', f'{curr_period}', 'Изменение за неделю'])
     res_df2.loc[0] = 'кол-во обращений', prev_data[0], curr_data[0], (
             (curr_data[0] - prev_data[0]) / prev_data[0]) * 100
-    res_df2.loc[1] = 'всего с начала 2021г.', np.nan, total_data[0], np.nan
+    res_df2.loc[1] = f'всего с начала {curr_period[6:10]}г.', np.nan, total_data[0], np.nan
     res_df2.loc[2] = 'не решено', prev_data[1], curr_data[1], ((curr_data[1] - prev_data[1]) / prev_data[1]) * 100
     res_df2.loc[3] = 'не решено, %', round(prev_data[1] / prev_data[0] * 100, 2), round(
         curr_data[1] / curr_data[0] * 100, 2), np.nan
-    res_df2.loc[4] = 'всего с начала 2021г', np.nan, total_data[1], np.nan
+    res_df2.loc[4] = f'всего с начала {curr_period[6:10]}г.', np.nan, total_data[1], np.nan
     res_df2.loc[5] = 'на запросе информации у пользователя', prev_data[2], curr_data[2], np.nan
     res_df2.loc[6] = 'на запросе информации у пользователя, %', round(prev_data[2] / prev_data[1] * 100, 2), round(
         curr_data[2] / curr_data[1] * 100, 2), np.nan
